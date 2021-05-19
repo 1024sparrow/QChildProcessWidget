@@ -5,7 +5,7 @@
 
 Генерируемая документация - md-страница с описанием "процедур", диаграмма таблиц (картинка, сгенерированная из сгенерированного *plantuml*)
 
-[!dd](https://raw.githubusercontent.com/grafov/plantuml2mysql/master/database.png)
+![dd](https://raw.githubusercontent.com/grafov/plantuml2mysql/master/database.png)
 ```
 UML legend:
 
