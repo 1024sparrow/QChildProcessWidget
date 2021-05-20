@@ -1,0 +1,15 @@
+#!/bin/bash
+
+PROTECTED_FILE=README.md
+
+if [ $1 == parent ]
+then
+	if [ ! -z "$(git diff parent/main ${PROTECTED_FILE})" ]
+	then
+		cp ${PROTECTED_FILE} .${PROTECTED_FILE}__copy
+		git checkout parent/main -- ${PROTECTED_FILE}
+		git add ${PROTECTED_FILE}
+		git commit -m"restored ${PROTECTED_FILE} (can not change on parent remote)"
+		mv .${PROTECTED_FILE}__copy ${PROTECTED_FILE}
+	fi
+fi
