@@ -13,7 +13,7 @@ int main(int argc, char **argv)
 		char *arg = argv[iArg];
 		if (!strcmp(arg, "--help"))
 		{
-			puts(R"(Example of Qt5-application (widgets-based) with thirdside webview (under MIT license))");
+			puts(R"(Example of Qt5-application (widgets-based) with thirdside webview (under BSD license 2.0))");
 			return 0;
 		}
 		else if (arg[0] == '-')
