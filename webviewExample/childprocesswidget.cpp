@@ -210,6 +210,13 @@ void ChildProcessWidget::timerEvent(QTimerEvent *event)
 				posCand.rx() += 1;
 				posCand.setY(posCand.y() + frameSize().height() - height());
 			}
+			else
+			{
+				posCand += window()->pos();
+
+				posCand.rx() += 1;
+				posCand.setY(posCand.y() + window()->frameSize().height() - window()->height());
+			}
 			wind->setPosition(posCand);
 		}
 		else

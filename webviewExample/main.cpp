@@ -25,19 +25,19 @@ int main(int argc, char **argv)
 
 	QApplication app(argc, argv);
 
-//	MainWindow mainWindow;
-//	mainWindow.resize(500,500);
-//	mainWindow.show();
+	MainWindow mainWindow;
+	mainWindow.resize(500,500);
+	mainWindow.show();
 
-	ChildProcessWidget *webview = new ChildProcessWidget(
-		ChildProcessWidget::Params{
-			"webview/1/webview-example",
-			{},
-			"Minimal example"
-		}
-	);
-	webview->resize(500,500);
-	webview->show();
+//	ChildProcessWidget *webview = new ChildProcessWidget(
+//		ChildProcessWidget::Params{
+//			"webview/1/webview-example",
+//			{},
+//			"Minimal example"
+//		}
+//	);
+//	webview->resize(500,500);
+//	webview->show();
 
 	return app.exec();
 }

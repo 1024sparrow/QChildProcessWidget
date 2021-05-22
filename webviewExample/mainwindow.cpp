@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include "childprocesswidget.h"
 
 #include <QBoxLayout>
 #include <QPushButton>
@@ -21,14 +22,23 @@ MainWindow::MainWindow()
 		bnToggleWebview->setFixedHeight(64);
 		lay->addWidget(bnToggleWebview);
 
-		QLabel *contentWidget = new QLabel("Some content ...", this);
-		{
-			contentWidget->setAutoFillBackground(true);
-			auto pal = contentWidget->palette();
-			pal.setBrush(QPalette::Background, Qt::BDiagPattern);
-			contentWidget->setPalette(pal);
-		}
-		lay->addWidget(contentWidget, 1);
+//		QLabel *contentWidget = new QLabel("Some content ...", this);
+//		{
+//			contentWidget->setAutoFillBackground(true);
+//			auto pal = contentWidget->palette();
+//			pal.setBrush(QPalette::Background, Qt::BDiagPattern);
+//			contentWidget->setPalette(pal);
+//		}
+//		lay->addWidget(contentWidget, 1);
+
+		ChildProcessWidget *webview = new ChildProcessWidget(
+			ChildProcessWidget::Params{
+				"webview/1/webview-example",
+				{},
+				"Minimal example"
+			}
+		);
+		lay->addWidget(webview, 1);
 	}
 
 }
