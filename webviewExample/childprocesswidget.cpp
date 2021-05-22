@@ -1,14 +1,20 @@
 #include "childprocesswidget.h"
 
+#include <QGuiApplication>
+#include <QScreen>
+#include <QWindow>
+#include <QMoveEvent>
+
 #include <QProcess>
 #include <QTextStream>
+#include <QPainter>
 #include <QDebug> // boris debug
 
 ChildProcessWidget::ChildProcessWidget(Params p_params, QWidget *p_parent)
 	: QWidget(p_parent)
 	, _params(p_params)
 {
-	QProcess *process = new QProcess(this);
+	process = new QProcess(this);
 	process->start(p_params.app, p_params.args);
 
 	if (p_params.windowTitle)
@@ -22,19 +28,39 @@ ChildProcessWidget::ChildProcessWidget(Params p_params, QWidget *p_parent)
 				this, &ChildProcessWidget::onFinished);
 		connect(_pListWindows, &QProcess::stateChanged,
 				this, &ChildProcessWidget::onStateChanged);
-
-		_pResizeWindow = new QProcess();
-		connect(_pResizeWindow, &QProcess::errorOccurred,
-				this, &ChildProcessWidget::onErrorOccurred);
-//		connect(_pResizeWindow, &QProcess::readyRead,
-//				this, &ChildProcessWidget::onListWindowReadyRead);
-		connect(_pResizeWindow, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
-				this, &ChildProcessWidget::onFinished);
-		connect(_pResizeWindow, &QProcess::stateChanged,
-				this, &ChildProcessWidget::onStateChanged);
 	}
 
-	startTimer(1000);
+	_pPreResizeWindow = new QProcess();
+	connect(_pPreResizeWindow, &QProcess::errorOccurred,
+			this, &ChildProcessWidget::onErrorOccurred);
+//		connect(_pPreResizeWindow, &QProcess::readyRead,
+//				this, &ChildProcessWidget::onListWindowReadyRead);
+	connect(_pPreResizeWindow, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
+			this, &ChildProcessWidget::onFinished);
+	connect(_pPreResizeWindow, &QProcess::stateChanged,
+			this, &ChildProcessWidget::onStateChanged);
+
+	_pResizeWindow = new QProcess();
+	connect(_pResizeWindow, &QProcess::errorOccurred,
+			this, &ChildProcessWidget::onErrorOccurred);
+//		connect(_pResizeWindow, &QProcess::readyRead,
+//				this, &ChildProcessWidget::onListWindowReadyRead);
+	connect(_pResizeWindow, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
+			this, &ChildProcessWidget::onFinished);
+	connect(_pResizeWindow, &QProcess::stateChanged,
+			this, &ChildProcessWidget::onStateChanged);
+
+	_pResizeWindow2 = new QProcess();
+	connect(_pResizeWindow2, &QProcess::errorOccurred,
+			this, &ChildProcessWidget::onErrorOccurred);
+//		connect(_pResizeWindow2, &QProcess::readyRead,
+//				this, &ChildProcessWidget::onListWindowReadyRead);
+	connect(_pResizeWindow2, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
+			this, &ChildProcessWidget::onFinished);
+	connect(_pResizeWindow2, &QProcess::stateChanged,
+			this, &ChildProcessWidget::onStateChanged);
+
+	startTimer(50);
 }
 
 void ChildProcessWidget::onListWindowReadyRead()
@@ -136,28 +162,72 @@ void ChildProcessWidget::onStateChanged(QProcess::ProcessState newState)
 //	qDebug() << "onStateChanged";
 }
 
+void ChildProcessWidget::paintEvent(QPaintEvent *event)
+{
+}
+
 void ChildProcessWidget::resizeEvent(QResizeEvent *event)
 {
-	//QProcess
-	_size = size();
-	_resizeNeeded = true;
+}
+
+void ChildProcessWidget::moveEvent(QMoveEvent *event)
+{
 }
 
 void ChildProcessWidget::timerEvent(QTimerEvent *event)
 {
+	//qDebug() << mapToGlobal(pos());
 	if (_pListWindows)
 	{
-		_pListWindows->start("wmctrl", {"-l"});
-	}
-	if (_pResizeWindow)
-	{
-		if (_wId)
+		if (++_timer % 20 == 0)
 		{
-			QString strWid = QString("0x") + QString::number(_wId, 16);
-			QString strWidth = QString::number(_size.width());
-			QString strHeigt = QString::number(_size.height());
-			_pResizeWindow->start("xdotool", {"windowsize", strWid, strWidth, strHeigt});
-			//qDebug() << _pResizeWindow->program() << _pResizeWindow->arguments();
+			_pListWindows->start("wmctrl", {"-l"});
 		}
 	}
+
+	if (_wId)
+	{
+		QString strWid = QString("0x") + QString::number(_wId, 16);
+		QString strWidth = QString::number(_size.width());
+		QString strHeigt = QString::number(_size.height());
+
+		QWindow *wind = QWindow::fromWinId(_wId);
+		if (isVisible() && !window()->isMinimized())
+		{
+			if (_timer % 60 == 0)
+			{
+	//			if (auto windowState = window->windowState())
+				{
+					_pResizeWindow2->start("wmctrl", {"-ir", strWid, "-b", "remove,hidden"});
+					_pPreResizeWindow->start("wmctrl", {"-ir", strWid, "-b", "remove,maximized_vert,maximized_horz"});
+					_pResizeWindow->start("wmctrl", {"-ir", strWid, "-b", "add,above"});
+				}
+			}
+			wind->resize(size().width() - 1, size().height() - 1);
+			QPoint posCand = pos();
+			if (isWindow())
+			{
+				posCand.rx() += 1;
+				posCand.setY(posCand.y() + frameSize().height() - height());
+			}
+			wind->setPosition(posCand);
+		}
+		else
+		{
+			wind->hide();
+			_pPreResizeWindow->start("wmctrl", {"-ir", strWid, "-b", "add,hidden"});
+		}
+	}
+}
+
+void ChildProcessWidget::closeEvent(QCloseEvent *)
+{
+	if (_wId)
+	{
+		process->close();
+	}
+}
+
+void ChildProcessWidget::focusOutEvent(QFocusEvent *event)
+{
 }

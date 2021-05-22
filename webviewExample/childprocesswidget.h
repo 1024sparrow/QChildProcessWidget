@@ -24,16 +24,26 @@ private slots:
 	void onStateChanged(QProcess::ProcessState newState);
 
 private:
-	void resizeEvent(QResizeEvent *event) override final;
-	void timerEvent(QTimerEvent *event) override final;
+	void paintEvent(QPaintEvent *event) override;
+	void resizeEvent(QResizeEvent *event) override;
+	void moveEvent(QMoveEvent *event) override;
+	void timerEvent(QTimerEvent *event) override;
+	void closeEvent(QCloseEvent *) override;
+	void focusOutEvent(QFocusEvent *event) override;
+	//void
 
 private:
 	Params _params;
+	QProcess *process {nullptr};
 	QProcess *_pListWindows {nullptr};
+	QProcess *_pPreResizeWindow {nullptr};
 	QProcess *_pResizeWindow {nullptr};
+	QProcess *_pResizeWindow2 {nullptr};
 	quint32 _wId {0};
-	bool _resizeNeeded {false};
+	bool _resizeNeeded {true};
 	QSize _size;
+	QPixmap _screenshot;
+	uint _timer {0};
 };
 
 #endif // CHILDPROCESSWIDGET_H
